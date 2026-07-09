@@ -7,82 +7,42 @@ class Solution {
 public:
     vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights) {
         if(heights.empty()) return heights;
-        vector<vector<bool>> left = leftGrid(heights);
-        vector<vector<bool>> right = rightGrid(heights);
+        int row = heights.size();
+        int col = heights[0].size();
+        vector<vector<bool>> left(row, vector<bool>(col, false));
+        vector<vector<bool>> right(row, vector<bool>(col, false));
         vector<vector<int>> grid;
-        int row = heights.size();
-        int col = heights[0].size();
-        for(int i = 1; i < row; i++){
-            for(int j = 1; j < col; j++){
-                if(left[i][j] == right[i][j]){
-                    grid[i][j+1] = true;
-                }else{
-                    grid[i][j+1] = false;
-                }
-            }
-        }
-        return grid;
-    }
-
-    vector<vector<bool>> leftGrid(vector<vector<int>>& heights){
-        vector<vector<bool>> grid;
-        int row = heights.size();
-        int col = heights[0].size();
         
         for(int i = 0; i < row; i++){
-            grid[i][0] = true;
+            dfs(heights,left,i,0);
+            dfs(heights,right,i,col-1);
         }
 
         for(int j = 0; j < col; j++){
-            grid[0][j] = true;
+            dfs(heights,left,0,j);
+            dfs(heights,right,row-1,j);
         }
 
-        for(int i = 1; i < row; i++){
-            for(int j = 1; j < col; j++){
-                if((heights[i][j] - heights[i][j+1]) <= 0){
-                    grid[i][j+1] = true;
-                }else{
-                    grid[i][j+1] = false;
-                }
-
-                if((heights[i][j] - heights[i+1][j]) <= 0){
-                    grid[i+1][j] = true;
-                }else{
-                    grid[i+1][j] = false;
+        for(int i = 0; i < row; i++){
+            for(int j = 0; j < col; j++){
+                if(left[i][j] && right[i][j]){
+                    grid.push_back({i,j});
                 }
             }
         }
         return grid;
     }
 
-    vector<vector<bool>> rightGrid(vector<vector<int>>& heights){
-        vector<vector<bool>> grid;
-        int row = heights.size();
-        int col = heights[0].size();
+    void dfs(vector<vector<int>>& heights,vector<vector<bool>>& grid, int row, int col){
+        grid[row][col] = true;
+        int dr[4][2] = {{0,1},{0,-1},{-1,0},{1,0}};
         
-        for(int i = row; i > 0; i--){
-            grid[i][0] = true;
+        for(auto& d: dr){
+            int ni = row+d[0];
+            int nj = col+d[1];
+            if(ni < 0 || nj < 0 || ni >= heights.size() || nj >= heights[0].size() || grid[ni][nj]) continue;
+            if(heights[row][col] > heights[ni][nj]) continue;
+            dfs(heights,grid,ni,nj);
         }
-
-        for(int j = col; j > 0; j--){
-            grid[0][j] = true;
-        }
-
-        for(int i = row; i > 0; i--){
-            for(int j = col; j > 0; j--){
-                if((heights[i][j] - heights[i][j-1]) >= 0){
-                    grid[i][j-1] = true;
-                }else{
-                    grid[i][j-1] = false;
-                }
-
-                if((heights[i][j] - heights[i-1][j]) >= 0){
-                    grid[i-1][j] = true;
-                }else{
-                    grid[i-1][j] = false;
-                }
-            }
-        }
-        return grid;
     }
 };
